@@ -27,9 +27,12 @@ jobs:
     - name: Install QEMU
       run: |
         sudo apt-get update
-        sudo apt-get install -y qemu
+        sudo apt-get install -y qemu qemu-system
+        rustup component add rust-src --toolchain stable-x86_64-unknown-linux-gnu
+        rustup component add llvm-tools-preview
+        cargo install cargo-binutils
     - name: Run tests
-      run: cargo install cargo-binutils && cargo test --test cicv --verbose
+      run: cargo test --test cicv --verbose
     - uses: yfblock/os-autograding@master
       id: autograding
       with:
