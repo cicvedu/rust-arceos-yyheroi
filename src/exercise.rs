@@ -1,11 +1,15 @@
 use regex::Regex;
 use serde::Deserialize;
+use tokio::time::timeout;
 use std::env::{self, current_dir};
 use std::fmt::{self, Display, Formatter};
 use std::fs::{self, remove_file, File};
 use std::io::Read;
 use std::path::PathBuf;
 use std::process::{self, Command};
+use std::time::Duration;
+use async_process::Command as AsyncCommand;
+
 
 const RUSTC_COLOR_ARGS: &[&str] = &["--color", "always"];
 const RUSTC_EDITION_ARGS: &[&str] = &["--edition", "2021"];
@@ -194,7 +198,6 @@ path = "{}.rs""#,
             }
         }
         .expect("Failed to run 'compile' command.");
-
         if cmd.status.success() {
             Ok(CompiledExercise {
                 exercise: self,
@@ -207,6 +210,53 @@ path = "{}.rs""#,
                 stdout: String::from_utf8_lossy(&cmd.stdout).to_string(),
                 stderr: String::from_utf8_lossy(&cmd.stderr).to_string(),
             })
+        }
+    }
+
+    pub async fn async_compile(&self) -> Result<CompiledExercise, ExerciseOutput> {
+        let cmd = match self.mode {
+            Mode::Arceos => {
+                let path: PathBuf = self.path.clone();
+                let dir_path = current_dir().unwrap();
+                let dir_path = dir_path.join(path);
+                let mut verify_sh = String::from("./verify ");
+                verify_sh.push_str(&self.name);
+                let timeout_duration = Duration::from_secs(5);
+                let mut cmd = AsyncCommand::new("sh");
+                // cmd.kill_on_drop(true);
+                cmd.current_dir(dir_path).arg("-c").arg(verify_sh);
+                let output = timeout(timeout_duration, cmd.output()).await;
+                match output {
+                    Ok(out) => out,
+                    Err(_) => Err(std::io::Error::from(std::io::ErrorKind::TimedOut))   
+                }
+            },
+            _ => Command::new("echo 1").output()
+        };
+
+        match cmd {
+            Ok(cmd) => {
+                if cmd.status.success() {
+                    Ok(CompiledExercise {
+                        exercise: self,
+                        _handle: FileHandle,
+                        stdout: String::from_utf8_lossy(&cmd.stdout).to_string(),
+                    })
+                } else {
+                    clean();
+                    Err(ExerciseOutput {
+                        stdout: String::from_utf8_lossy(&cmd.stdout).to_string(),
+                        stderr: String::from_utf8_lossy(&cmd.stderr).to_string(),
+                    })
+                }
+            },
+            Err(err) => {
+                clean();
+                Err(ExerciseOutput {
+                    stdout: err.to_string(),
+                    stderr: err.to_string(),
+                })
+            },
         }
     }
 
@@ -290,6 +340,8 @@ path = "{}.rs""#,
         self.state() == State::Done
     }
 }
+
+
 
 impl Display for Exercise {
     fn fmt(&self, f: &mut Formatter) -> fmt::Result {

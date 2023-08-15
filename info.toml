@@ -67,15 +67,39 @@
 [[exercises]]
 name = "a0"
 dirname = "a0"
-path = "exercises/lesson1"
+path = "exercises/cos_arceos"
 mode = "arceos"
-result = "Result: Okay!"
+result = "[ArceOS Tutorial]: A0 okay!"
 hint = ""
 
 [[exercises]]
-name = "a1_mmu_disable"
+name = "a1"
 dirname = "a1"
-path = "exercises/lesson1"
+path = "exercises/cos_arceos"
 mode = "arceos"
-result = "Result: disable mmu Okay!"
+result = "[ArceOS Tutorial]: A1 okay!"
+hint = ""
+
+[[exercises]]
+name = "a2"
+dirname = "a2"
+path = "exercises/cos_arceos"
+mode = "arceos"
+result = "[ArceOS Tutorial]: A2 okay!"
+hint = ""
+
+[[exercises]]
+name = "a3"
+dirname = "a3"
+path = "exercises/cos_arceos"
+mode = "arceos"
+result = "[ArceOS Tutorial]: A3 okay!"
+hint = ""
+
+[[exercises]]
+name = "a4"
+dirname = "a4"
+path = "exercises/cos_arceos"
+mode = "arceos"
+result = "[ArceOS Tutorial]: A4 okay!"
 hint = ""

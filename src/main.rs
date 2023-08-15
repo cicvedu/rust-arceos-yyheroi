@@ -1,6 +1,6 @@
 use crate::exercise::{Exercise, ExerciseList};
 use crate::project::RustAnalyzerProject;
-use crate::run::{reset, run};
+use crate::run::{reset, run, runasync};
 use crate::verify::verify;
 use argh::FromArgs;
 use console::Emoji;
@@ -293,7 +293,7 @@ async fn main() {
                 let exercise_check_list_ref = Arc::clone(&exercise_check_list);
                 let _verbose = verbose.clone();
                 let t = tokio::task::spawn( async move {
-                    match run(&inner_exercise, true) {
+                    match runasync(&inner_exercise, true).await {
                     // match verify(vec![&inner_exercise], (0, 1), true, true) {
                         Ok(_) => {
                             *c_mutex.lock().unwrap() += 1;
@@ -322,7 +322,12 @@ async fn main() {
                 });
                 tasks.push(t);
             }
-            for task in tasks { task.await.unwrap(); }
+            for task in tasks { 
+                match task.await {
+                    Ok(res) => println!("{:?}", res),
+                    Err(err) => println!("{:?}", err),
+                }
+            }
             let now_end = SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs();
             let total_time = now_end - now_start;
             println!("===============================试卷批改完成,总耗时: {} s; ==================================", total_time);
