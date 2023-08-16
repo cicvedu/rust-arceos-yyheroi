@@ -13,7 +13,7 @@ pub fn run(exercise: &Exercise, verbose: bool) -> Result<(), ()> {
         Mode::Test => test(exercise, verbose)?,
         Mode::Compile => compile_and_run(exercise)?,
         Mode::Clippy => compile_and_run(exercise)?,
-        // Mode::Arceos => "", //arceos(exercise)?,
+        Mode::Arceos => compile_and_arceos(exercise)?,
         _ => println!("")
     }
     Ok(())
@@ -149,4 +149,34 @@ async fn arceos(exercise: &Exercise) -> Result<(), ()> {
         }
     };
     result
+}
+
+fn compile_and_arceos(exercise: &Exercise) -> Result<(), ()> {
+    let progress_bar = ProgressBar::new_spinner();
+    progress_bar.set_message(format!("Compiling {exercise}..."));
+    progress_bar.enable_steady_tick(100);
+
+    progress_bar.set_message(format!("Running {exercise}..."));
+    let compilation_result = exercise.compile();
+    let compilation = match compilation_result {
+        Ok(compilation) => compilation,
+        Err(output) => {
+            progress_bar.finish_and_clear();
+            warn!(
+                "Compilation of {} failed!, Compiler error message:\n",
+                exercise
+            );
+            println!("{}", output.stderr);
+            return Err(());
+        }
+    };
+    let result = compilation.stdout;
+    println!("{}", result);
+    progress_bar.finish_and_clear();
+    if result.contains(&exercise.result){
+        Ok(())
+    } else {
+        Err(())
+    }
+    
 }
