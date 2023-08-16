@@ -221,14 +221,18 @@ path = "{}.rs""#,
                 let dir_path = dir_path.join(path);
                 let mut verify_sh = String::from("./verify ");
                 verify_sh.push_str(&self.name);
-                let timeout_duration = Duration::from_secs(5);
+                let timeout_duration = Duration::from_secs(180);
                 let mut cmd = AsyncCommand::new("sh");
-                // cmd.kill_on_drop(true);
+                cmd.kill_on_drop(true);
                 cmd.current_dir(dir_path).arg("-c").arg(verify_sh);
-                let output = timeout(timeout_duration, cmd.output()).await;
+                let output: Result<Result<process::Output, std::io::Error>, tokio::time::error::Elapsed> = timeout(timeout_duration, cmd.output()).await;
                 match output {
                     Ok(out) => out,
-                    Err(_) => Err(std::io::Error::from(std::io::ErrorKind::TimedOut))   
+                    Err(err) => {
+                        // cmd.kill_on_drop(true);
+                        println!("{}超时了：{}", self.name, err);    
+                        Err(std::io::Error::from(std::io::ErrorKind::TimedOut)) 
+                    }  
                 }
             },
             _ => Command::new("echo 1").output()

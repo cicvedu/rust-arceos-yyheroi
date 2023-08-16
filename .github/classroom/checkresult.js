@@ -6,7 +6,7 @@ function judge(outputFile) {
         let points = {};
         jsonResult.exercises.forEach(({ name, result }) => {
             if (result) {
-                points[name] = [1,20]
+                points[name] = [20,20]
             } else {
                 points[name] = [0,20]
             }
