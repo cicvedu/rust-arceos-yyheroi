@@ -84,46 +84,12 @@ fn compile_and_run(exercise: &Exercise) -> Result<(), ()> {
     }
 }
 
-
 async fn async_arceos(exercise: &Exercise) -> Result<(), ()> {
     let progress_bar = ProgressBar::new_spinner();
     progress_bar.set_message(format!("Compiling {exercise}...{}", exercise.name));
     progress_bar.enable_steady_tick(100);
 
     let compilation_result = exercise.async_compile().await;
-    let result = match compilation_result {
-        Ok(compilation) => {
-            println!(" compilation.stdout:::::--->{}",  compilation.stdout);
-            if compilation.stdout.contains(&exercise.result) {
-                // compilation
-                return Ok(());
-            } else {
-                println!(
-                    "Compilation of {} failed!, Compiler error message:\n",
-                    exercise
-                );
-                Err(())
-            }
-        },
-        Err(output) => {
-            progress_bar.finish_and_clear();
-            println!(
-                "Compilation of {} failed!, Compiler error message:\n",
-                exercise
-            );
-            println!("{}", output.stderr);
-            return Err(());
-        }
-    };
-    result
-}
-
-async fn arceos(exercise: &Exercise) -> Result<(), ()> {
-    let progress_bar = ProgressBar::new_spinner();
-    progress_bar.set_message(format!("Compiling {exercise}...{}", exercise.name));
-    progress_bar.enable_steady_tick(100);
-
-    let compilation_result = exercise.compile();
     let result = match compilation_result {
         Ok(compilation) => {
             println!(" compilation.stdout:::::--->{}",  compilation.stdout);
