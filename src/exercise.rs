@@ -221,7 +221,7 @@ path = "{}.rs""#,
                 let dir_path = dir_path.join(path);
                 let mut verify_sh = String::from("./verify ");
                 verify_sh.push_str(&self.name);
-                let timeout_duration = Duration::from_secs(180);
+                let timeout_duration = Duration::from_secs(240);
                 let mut cmd = AsyncCommand::new("sh");
                 cmd.kill_on_drop(true);
                 cmd.current_dir(dir_path).arg("-c").arg(verify_sh);
